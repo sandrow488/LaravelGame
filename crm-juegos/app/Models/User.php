@@ -45,4 +45,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    // Relación: Un usuario tiene muchos roles
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    // Relación: Un usuario puede crear muchos juegos
+    public function games()
+    {
+        return $this->hasMany(Game::class);
+    }
 }
