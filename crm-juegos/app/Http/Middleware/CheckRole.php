@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckRole
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  string ...$roles
+     */
+    public function handle(Request $request, Closure $next, ...$roles): Response
+    {
+        if (! $request->user()) {
+            return redirect('login');
+        }
+
+        // Recuperar los roles del usuario autenticado
+        $userRoles = $request->user()->roles->pluck('name')->toArray();
+
+        // Si el usuario no tiene al menos uno de los roles requeridos, abortar con error 403
+        $hasRole = false;
+        foreach ($roles as $role) {
+            if (in_array($role, $userRoles)) {
+                $hasRole = true;
+                break;
+            }
+        }
+
+        if (!$hasRole) {
+            abort(403, 'No tienes permiso para acceder a esta área (requiere rol: ' . implode(' o ', $roles) . ').');
+        }
+
+        return $next($request);
+    }
+}

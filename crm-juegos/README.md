@@ -1,59 +1,36 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Proyecto CRM de Juegos y API Laravel + Three.js
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto es una práctica completa de Desarrollo de Aplicaciones Web (DAW) que integra un Backend robusto en Laravel con un Frontend desacoplado en React para la gestión (CRM) y un juego externo en Three.js que consume su API.
 
-## About Laravel
+## 🚀 Tecnologías Utilizadas
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+*   **Laravel 11/12:** Framework PHP principal usado para la arquitectura, enrutamiento, ORM (Eloquent), migraciones y protección de rutas.
+*   **PostgreSQL:** Sistema de gestión de base de datos relacional para almacenar usuarios, roles, y los metadatos de los juegos.
+*   **Laravel Breeze (React con Inertia.js):** Pila elegida para solucionar la autenticación de fábrica y renderizar la interfaz de usuario en el frontend, usando Inertia para evitar la creación de una API completa solo para el CRM.
+*   **Tailwind CSS:** Framework CSS de utilidad para estilizar rápidamente las vistas del CRM.
+*   **Three.js / Vanilla JS (Juego3D):** Juego interactivo cliente integrado como archivos estáticos que se comunica exclusivamente con la API de Laravel para guardar puntuaciones y validaciones de sesión.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🏗️ Arquitectura y Separación de Responsabilidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+El proyecto está diseñado siguiendo el patrón MVC y separando estrictamente la administración del consumo de la API:
 
-## Learning Laravel
+1.  **Capa de Autenticación y Permisos:**
+    *   Implementada con los modelos `User` y `Role` (relación Many-to-Many).
+    *   Un **Middleware personalizado (`CheckRole.php`)** protege las rutas del sistema basándose en el rol del usuario (administrador, gestor o jugador).
+2.  **Rutas Separadas:**
+    *   `routes/web.php`: Controla la navegación del CRM, el inicio de sesión y la visualización de juegos (para jugadores). Las rutas están protegidas por sesión y cookies.
+    *   `routes/api.php`: Contiene endpoints puramente JSON (ej. `/api/games/start` y `/api/games/result`) pensados exclusivamente para ser consumidos por el `Juego3D` (cliente externo).
+3.  **CRM de Gestión de Juegos (React):**
+    *   Las vistas (ubicadas en `resources/js/Pages/Games/`) y el controlador `GameController` permiten realizar un CRUD completo sobre la entidad `Game`.
+    *   Los juegos no se tocan a nivel de código; el CRM solo gestiona sus rutas y estados de publicación.
+4.  **Experiencia del Jugador:**
+    *   Los usuarios con el rol `jugador` o sin privilegios de gestión ven un Dashboard filtrado solo con los juegos publicados (`is_published = true`).
+    *   Al jugar, se incrusta el entorno estático del juego (`Juego3D/dist` servido desde `public/juegos/base`) dentro del layout de la plataforma sin salir de la misma (usando `iframe`), listo para la comunicación asíncrona mediante la API.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📦 Base de Datos
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+*   Se utilizó `php artisan migrate:fresh --seed` para la configuración inicial.
+*   El `DatabaseSeeder` inyecta automáticamente los tres roles (`administrador`, `gestor`, `jugador`), crea un usuario de prueba para cada rol e inserta 5 simulaciones de juegos publicadas y no publicadas que referencian al `Juego3D`.
 
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+*Práctica de desarrollo web orientada a la simplicidad, seguridad y separación API/Web.*

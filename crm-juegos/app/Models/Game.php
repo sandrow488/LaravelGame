@@ -13,4 +13,9 @@ class Game extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function sessions()
+    {
+        return $this->hasMany(GameSession::class);
+    }
 }
